@@ -168,6 +168,18 @@ namespace gr {
                              gr_vector_void_star &output_items);
 
     /*!
+     * \brief called to tell that one of the upstream blocks is done
+     *
+     * This allows a block to know when there are no more input
+     * samples coming. This can be used to implement functionality
+     * which appends something after the last input sample etc.
+     *
+     * If not overridden, it returns WORK_DONE, which makes it also
+     * be marked as done.
+     */
+    virtual int input_done(int index);
+
+    /*!
      * \brief Called to enable drivers, etc for i/o devices.
      *
      * This allows a block to enable an associated driver to begin

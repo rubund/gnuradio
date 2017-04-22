@@ -897,6 +897,14 @@ namespace gr {
     return os;
   }
 
+
+  int
+  block::input_done(int index)
+  {
+    return block::WORK_DONE;
+  }
+
+
   int
   block::general_work(int noutput_items,
                       gr_vector_int &ninput_items,

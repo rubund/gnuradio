@@ -192,6 +192,7 @@ namespace gr {
     int max_noutput_items;
     int new_alignment = 0;
     int alignment_state = -1;
+    int index_done_block;
     double rrate;
 
     block        *m = d_block.get();
@@ -399,8 +400,12 @@ namespace gr {
 
         // We're blocked on input
         LOG(*d_log << "  BLKD_IN\n");
-        if(d_input_done[i])   // If the upstream block is done, we're done
-          goto were_done;
+        if(d_input_done[i]) {  // If the upstream block is done, we call
+                               // input_done to make the block aware of
+                               // this.
+          index_done_block = i;
+          goto input_done;
+        }
 
         // Is it possible to ever fulfill this request?
         if(d_ninput_items_required[i] > d->input(i)->max_possible_items_available()) {
@@ -507,6 +512,15 @@ namespace gr {
       return READY_NO_OUTPUT;
     }
     assert(0);
+
+  // If any of the upstream blocks are done, call input_done with the index of
+  // the upstream block. If it returns block::WORK_DONE, the block is complete.
+  // If it returns anything else, let the caller try again.
+  input_done:
+    int ret;
+    ret = m->input_done(index_done_block);
+    if (ret != block::WORK_DONE)
+      return READY_NO_OUTPUT;
 
   were_done:
     LOG(*d_log << "  were_done\n");
