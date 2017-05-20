@@ -194,8 +194,18 @@ namespace gr {
     void
     corr_est_cc_impl::_set_threshold(float threshold)
     {
+      // Compute a correlation threshold.
+      // Compute the value of the discrete autocorrelation of the matched
+      // filter with offset 0 (aka the autocorrelation peak).
+      float corr = 0;
+      for(size_t i = 0; i < d_symbols.size(); i++)
+        corr += abs(d_symbols[i]*conj(d_symbols[i]));
+      d_thresh = threshold*corr*corr;
+
       d_stashed_threshold = threshold;
+      /*
       d_pfa = -logf(1.0f-threshold);
+      */
     }
 
     void
@@ -240,12 +250,15 @@ namespace gr {
       int isps = (int)(d_sps + 0.5f);
       int i = 0;
       while(i < noutput_items) {
+        /*
         // Look for the correlator output to cross the threshold.
         // Sum power over two consecutive symbols in case we're offset
         // in time. If off by 1/2 a symbol, the peak of any one point
         // is much lower.
         float corr_mag = d_corr_mag[i] + d_corr_mag[i+1];
         if(corr_mag <= 4*detection) {
+        */
+        if(d_corr_mag[i] <= d_thresh) {
           i++;
           continue;
         }
